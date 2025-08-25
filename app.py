@@ -196,4 +196,4 @@ if run_opt and tickers:
         st.error(f"❌ Error: {e}")
 
 st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
-st.markdown("<div style='text-align: center; color: #6c757d; margin-top: 2rem;'>Created by Liaw Rui Xian \n • This does not constitute a financial advice</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: #6c757d; margin-top: 2rem;'>Created by Liaw Rui Xian \n • This does not constitue a financial advice</div>", unsafe_allow_html=True)
