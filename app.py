@@ -54,7 +54,7 @@ with st.sidebar:
     dca_interval = st.selectbox("DCA Interval", ["Monthly", "Weekly", "Daily"])
 
     with st.expander("🔧 Optimization Settings", expanded=True):
-        objective = st.selectbox("Objective Function", [
+        objective = st.selectbox("Objective", [
             "Maximize Sharpe Ratio",
             "Minimize Volatility",
             "Minimize Volatility for Target Return",
