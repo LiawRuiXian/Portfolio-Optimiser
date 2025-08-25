@@ -1,21 +1,18 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import plotly.graph_objects as go
 from data import fetch_price_data, price_to_returns
 from optimiser import optimize_portfolio
 from backtest import run_dca_backtest, calculate_performance_metrics
 from visual.plot import plot_portfolio_vs_benchmark, plot_efficient_frontier
 import plotly.express as px
 
-# --- Page Config ---
 st.set_page_config(
     page_title="Portfolio Optimizer Dashboard",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# --- Dark Theme CSS ---
 st.markdown("""
 <style>
 .stApp { background-color: #0F111A; color: #E0E0E0; font-family: 'Segoe UI', sans-serif; }
@@ -40,7 +37,7 @@ st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
 # --- Sidebar Inputs ---
 with st.sidebar:
     st.markdown("### ⚙️ Portfolio Configuration")
-    tickers_input = st.text_input("Enter comma-separated tickers (e.g., AAPL, MSFT, GOOGL)", "AAPL, MSFT, GOOG, AMZN", label_visibility="collapsed")
+    tickers_input = st.text_input("Enter comma-separated tickers", "AAPL, MSFT, META, AMZN", label_visibility="collapsed")
     tickers = [t.strip().upper() for t in tickers_input.split(",") if t.strip()]
     
     col1, col2 = st.columns(2)
@@ -66,14 +63,12 @@ with st.sidebar:
         if objective == "Minimize Volatility for Target Return":
             target_return = st.slider("Target Annual Return (%)", 0.0, 50.0, 10.0, 0.5)/100
 
-    st.info("Backtesting uses Dollar-Cost Averaging (DCA) only")
+    st.info("Currently, only support backtesting using Dollar-Cost Averaging (DCA)")
 
-# --- Run Button ---
 run_opt = st.button("🚀 Run Portfolio Optimization", use_container_width=True)
 
 interval_map = {"Daily": "D", "Weekly": "W", "Monthly": "M"}
 
-# --- Helper Functions ---
 @st.cache_data
 def fetch_prices_safe(tickers, start, end):
     return fetch_price_data(tickers, start=start, end=end)
@@ -86,18 +81,15 @@ def validate_tickers(prices, tickers):
     invalid = [t for t in tickers if t not in prices.columns]
     return valid, invalid
 
-# --- Run Optimization ---
 if run_opt and tickers:
     try:
         with st.spinner("Fetching data and optimizing portfolio..."):
             prices = fetch_prices_safe(tickers, start=start_date, end=end_date)
             
-            # Check if prices is None or empty
             if prices is None or prices.empty:
                 st.error("Failed to fetch price data. Please check your tickers and date range.")
                 st.stop()
             
-            # Validate tickers
             valid_tickers, invalid_tickers = validate_tickers(prices, tickers)
 
             if invalid_tickers:
@@ -111,7 +103,6 @@ if run_opt and tickers:
             rets = price_to_returns(prices, interval_map[freq])
             weights_res = optimize_portfolio(rets, objective=objective, target_return=target_return, freq=freq)
 
-            # Benchmark
             benchmark_prices = fetch_prices_safe(["VOO"], start=start_date, end=end_date)
 
             if benchmark_prices is None or benchmark_prices.empty:
@@ -120,33 +111,29 @@ if run_opt and tickers:
         st.success("✅ Optimization completed successfully!")
         tabs = st.tabs(["📊 Portfolio Overview", "📈 Backtest Results", "📐 Efficient Frontier"])
 
-        # --- Portfolio Overview ---
         with tabs[0]:
             st.markdown("<h2 class='sub-header'>Optimal Portfolio Allocation</h2>", unsafe_allow_html=True)
-            # Convert weights to DataFrame
+
             weights_df = pd.DataFrame(weights_res["weights"], index=valid_tickers, columns=["Weight"])
             weights_df["Weight"] = pd.to_numeric(weights_df["Weight"], errors='coerce')
 
-            # Create a pie chart
             fig = px.pie(weights_df, 
                         names=weights_df.index, 
                         values="Weight", 
-                        color=weights_df.index,  # optional: different colors per ticker
-                        color_discrete_sequence=px.colors.qualitative.Pastel)  # optional color palette
+                        color=weights_df.index,
+                        color_discrete_sequence=px.colors.qualitative.Pastel)  #color palette
 
-            fig.update_traces(textinfo='percent+label')  # show both percentage and label
+            fig.update_traces(textinfo='percent+label')
             fig.update_layout(
-                margin=dict(t=50, b=50, l=50, r=50),  # increase margin in pixels
-                height=600,  # optional: adjust chart height
+                margin=dict(t=50, b=50, l=50, r=50),
+                height=600,
             )
             st.plotly_chart(fig, use_container_width=True)
 
-        # --- Backtest ---
         with tabs[1]: 
             
             st.markdown("<h3 class='sub-header'>Performance metrics</h3>", unsafe_allow_html=True)
 
-            # --- Simulate DCA once ---
             prices, net_worth_df, portfolio_df = run_dca_backtest(
                 rets,
                 weights_res["weights"],
@@ -154,7 +141,6 @@ if run_opt and tickers:
                 interval=interval_map[dca_interval]
             )
 
-            # --- Calculate metrics on portfolio total ---
             metrics = calculate_performance_metrics(portfolio_df, freq=interval_map[freq])
             metric_keys = [
                 ("Annual Return", f"{metrics['Annual Return']:.2%}"),
@@ -185,7 +171,6 @@ if run_opt and tickers:
             else:
                 st.info("No benchmark data available to plot.")
 
-        # --- Efficient Frontier ---
         with tabs[2]:
             st.markdown("<h2 class='sub-header'>Efficient Frontier</h2>", unsafe_allow_html=True)
             
@@ -210,6 +195,5 @@ if run_opt and tickers:
     except Exception as e:
         st.error(f"❌ Error: {e}")
 
-# --- Footer ---
 st.markdown("<div class='divider'></div>", unsafe_allow_html=True)
-st.markdown("<div style='text-align: center; color: #6c757d; margin-top: 2rem;'>Created by Liaw Rui Xian • Not A Financial Advice</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: #6c757d; margin-top: 2rem;'>Created by Liaw Rui Xian \n • This does not constitue a financial advice</div>", unsafe_allow_html=True)

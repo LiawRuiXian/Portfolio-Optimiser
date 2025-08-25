@@ -2,7 +2,6 @@ import numpy as np
 from backtest.performance import max_drawdown, downside_vol, cvar_loss
 
 def portfolio_perf(w, mu, Sigma, rf):
-    """计算投资组合收益、波动、夏普"""
     ret = float(w @ mu)
     vol = float(np.sqrt(max(1e-12, w @ Sigma @ w)))
     sharpe = (ret - rf)/vol if vol>0 else -np.inf

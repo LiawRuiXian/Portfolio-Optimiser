@@ -8,12 +8,10 @@ def plot_portfolio_vs_benchmark(net_worth_df, portfolio_series, benchmark_prices
     """
     Plot DCA portfolio vs benchmark using precomputed results.
     """
-    # Normalize portfolio
     portfolio_norm = portfolio_series / portfolio_series.iloc[0] * amount
 
     fig = go.Figure()
 
-    # Portfolio total line
     fig.add_trace(go.Scatter(
         x=portfolio_norm.index,
         y=portfolio_norm.values,
@@ -23,7 +21,7 @@ def plot_portfolio_vs_benchmark(net_worth_df, portfolio_series, benchmark_prices
         hovertemplate="Date: %{x}<br>Portfolio: $%{y:,.2f}<extra></extra>"
     ))
 
-    # Individual assets (faded background lines)
+    # Individual assets
     for col in net_worth_df.columns:
         asset_norm = net_worth_df[col] / net_worth_df[col].iloc[0] * amount
         fig.add_trace(go.Scatter(
@@ -32,7 +30,7 @@ def plot_portfolio_vs_benchmark(net_worth_df, portfolio_series, benchmark_prices
             mode='lines',
             name=col,
             line=dict(width=1),
-            opacity=0.3,
+            opacity=0.5,
             showlegend=False,
             hovertemplate=f"Date: %{{x}}<br>{col}: $%{{y:,.2f}}<extra></extra>"
         ))
@@ -52,7 +50,6 @@ def plot_portfolio_vs_benchmark(net_worth_df, portfolio_series, benchmark_prices
             hovertemplate="Date: %{x}<br>Benchmark: $%{y:,.2f}<extra></extra>"
         ))
 
-    # Final layout tweaks
     fig.update_layout(
         title="DCA Portfolio vs Benchmark",
         xaxis_title="Date",
@@ -70,7 +67,6 @@ def plot_portfolio_vs_benchmark(net_worth_df, portfolio_series, benchmark_prices
     )
     return fig
 
-# --- Efficient Frontier Plot ---
 def plot_efficient_frontier(returns: pd.DataFrame, optimal_weights, benchmark_returns: pd.Series = None, points=100):
     np.random.seed(42)
 
@@ -81,7 +77,7 @@ def plot_efficient_frontier(returns: pd.DataFrame, optimal_weights, benchmark_re
     mean_returns = returns.mean() * 252
     cov_matrix = returns.cov() * 252
 
-    # --- Generate random portfolios ---
+    # Generate random portfolios
     results = []
     for _ in range(points):
         w = np.random.random(n_assets)
@@ -92,7 +88,7 @@ def plot_efficient_frontier(returns: pd.DataFrame, optimal_weights, benchmark_re
 
     results_df = pd.DataFrame(results)
 
-    # --- Optimal portfolio ---
+    # Optimal portfolio
     if isinstance(optimal_weights, dict):
         opt_weights_arr = np.array([float(optimal_weights.get(t, 0)) for t in returns.columns])
     else:
@@ -101,14 +97,13 @@ def plot_efficient_frontier(returns: pd.DataFrame, optimal_weights, benchmark_re
     opt_return = float(np.dot(opt_weights_arr, mean_returns))
     opt_vol = float(np.sqrt(np.dot(opt_weights_arr.T, np.dot(cov_matrix, opt_weights_arr))))
 
-    # --- Benchmark ---
+    # Benchmark 
     benchmark_point = None
     if benchmark_returns is not None:
         benchmark_mean = float(benchmark_returns.mean() * 252)
         benchmark_vol = float(benchmark_returns.std() * np.sqrt(252))
         benchmark_point = (benchmark_vol, benchmark_mean)
 
-    # --- Build figure ---
     fig = go.Figure()
 
     # Random portfolios
