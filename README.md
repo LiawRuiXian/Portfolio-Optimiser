@@ -1,6 +1,6 @@
-# Portfolio Optimiser Dashboard
+# Portfolio Optimiser Wizard
 
-**Portfolio Optimiser Dashboard** is an intuitive and interactive web application that helps **non-finance professionals** to create and optimise their investment portfolios using **Modern Portfolio Theory (MPT)**. . Users enter the stocks they follow and choose a optimisation objective such as **maximising Sharpe ratio, minimising volatility, or minimising volatility for a target return**, etc. The dashboard visualises portfolio performance against a benchmark and calculates key metrics, including **annualised return, Sharpe ratio, maximum drawdown**, etc.
+**Portfolio Optimiser Wizard** is an intuitive and interactive web based dashboard that helps **non-finance professionals** to create and optimise their investment portfolios using **Modern Portfolio Theory (MPT)**. . Users enter the stocks they follow and choose a optimisation objective such as **maximising Sharpe ratio, minimising volatility, or minimising volatility for a target return**, etc. The dashboard visualises portfolio performance against a benchmark and calculates key metrics, including **annualised return, Sharpe ratio, maximum drawdown**, etc.
 Users can also explore the **efficient frontier**, by hovering over points to see each portfolio’s return, volatility, and asset weights. With this tool, users can easily identify their **optimal portfolio allocation** effortlessly, without needing advanced financial knowledge.
  
 ## Installation
